@@ -2,6 +2,7 @@ const std = @import("std");
 
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
+
     var file = try std.fs.cwd().openFile("input.txt", .{});
     defer file.close();
 
@@ -16,35 +17,25 @@ pub fn main() !void {
         var last_num: u8 = undefined;
         var first = true;
         for (line, 0..) |_, i| {
-            if (i + 4 <= line.len and std.mem.eql(u8, line[i .. i + 4], "zero")) {
-                std.log.info("{s} == zero", .{line[i..]});
+            if (i + "zero".len <= line.len and std.mem.eql(u8, line[i .. i + "zero".len], "zero")) {
                 line[i] = '0';
-            } else if (i + 3 <= line.len and std.mem.eql(u8, line[i .. i + 3], "one")) {
-                std.log.info("{s} == one", .{line[i..]});
+            } else if (i + "one".len <= line.len and std.mem.eql(u8, line[i .. i + "one".len], "one")) {
                 line[i] = '1';
-            } else if (i + 3 <= line.len and std.mem.eql(u8, line[i .. i + 3], "two")) {
-                std.log.info("{s} == two", .{line[i..]});
+            } else if (i + "two".len <= line.len and std.mem.eql(u8, line[i .. i + "two".len], "two")) {
                 line[i] = '2';
-            } else if (i + 5 <= line.len and std.mem.eql(u8, line[i .. i + 5], "three")) {
-                std.log.info("{s} == three", .{line[i..]});
+            } else if (i + "three".len <= line.len and std.mem.eql(u8, line[i .. i + "three".len], "three")) {
                 line[i] = '3';
-            } else if (i + 4 <= line.len and std.mem.eql(u8, line[i .. i + 4], "four")) {
-                std.log.info("{s} == four", .{line[i..]});
+            } else if (i + "four".len <= line.len and std.mem.eql(u8, line[i .. i + "four".len], "four")) {
                 line[i] = '4';
-            } else if (i + 4 <= line.len and std.mem.eql(u8, line[i .. i + 4], "five")) {
-                std.log.info("{s} == five", .{line[i..]});
+            } else if (i + "five".len <= line.len and std.mem.eql(u8, line[i .. i + "five".len], "five")) {
                 line[i] = '5';
-            } else if (i + 3 <= line.len and std.mem.eql(u8, line[i .. i + 3], "six")) {
-                std.log.info("{s} == six", .{line[i .. i + 3]});
+            } else if (i + "six".len <= line.len and std.mem.eql(u8, line[i .. i + "six".len], "six")) {
                 line[i] = '6';
-            } else if (i + 5 <= line.len and std.mem.eql(u8, line[i .. i + 5], "seven")) {
-                std.log.info("{s} == seven", .{line[i..]});
+            } else if (i + "seven".len <= line.len and std.mem.eql(u8, line[i .. i + "seven".len], "seven")) {
                 line[i] = '7';
-            } else if (i + 5 <= line.len and std.mem.eql(u8, line[i .. i + 5], "eight")) {
-                std.log.info("{s} == eight", .{line[i..]});
+            } else if (i + "eight".len <= line.len and std.mem.eql(u8, line[i .. i + "eight".len], "eight")) {
                 line[i] = '8';
-            } else if (i + 4 <= line.len and std.mem.eql(u8, line[i .. i + 4], "nine")) {
-                std.log.info("{s} == nine", .{line[i..]});
+            } else if (i + "nine".len <= line.len and std.mem.eql(u8, line[i .. i + "nine".len], "nine")) {
                 line[i] = '9';
             }
 
