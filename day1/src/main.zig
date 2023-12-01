@@ -16,32 +16,18 @@ pub fn main() !void {
 
     var sum: i32 = 0;
 
+    const alpha_digits = [_][]const u8{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+
     var buf: [1024]u8 = undefined;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         var first_num: u8 = undefined;
         var last_num: u8 = undefined;
         var first = true;
         for (line, 0..) |_, i| {
-            if (i + "zero".len <= line.len and std.mem.eql(u8, line[i .. i + "zero".len], "zero")) {
-                line[i] = '0';
-            } else if (i + "one".len <= line.len and std.mem.eql(u8, line[i .. i + "one".len], "one")) {
-                line[i] = '1';
-            } else if (i + "two".len <= line.len and std.mem.eql(u8, line[i .. i + "two".len], "two")) {
-                line[i] = '2';
-            } else if (i + "three".len <= line.len and std.mem.eql(u8, line[i .. i + "three".len], "three")) {
-                line[i] = '3';
-            } else if (i + "four".len <= line.len and std.mem.eql(u8, line[i .. i + "four".len], "four")) {
-                line[i] = '4';
-            } else if (i + "five".len <= line.len and std.mem.eql(u8, line[i .. i + "five".len], "five")) {
-                line[i] = '5';
-            } else if (i + "six".len <= line.len and std.mem.eql(u8, line[i .. i + "six".len], "six")) {
-                line[i] = '6';
-            } else if (i + "seven".len <= line.len and std.mem.eql(u8, line[i .. i + "seven".len], "seven")) {
-                line[i] = '7';
-            } else if (i + "eight".len <= line.len and std.mem.eql(u8, line[i .. i + "eight".len], "eight")) {
-                line[i] = '8';
-            } else if (i + "nine".len <= line.len and std.mem.eql(u8, line[i .. i + "nine".len], "nine")) {
-                line[i] = '9';
+            for (alpha_digits, 0..) |alpha_digit, j| {
+                if (i + alpha_digit.len <= line.len and std.mem.eql(u8, line[i .. i + alpha_digit.len], alpha_digit)) {
+                    line[i] = @as(u8, @truncate(j)) + '0';
+                }
             }
 
             if (line[i] >= '0' and line[i] <= '9') {
