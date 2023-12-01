@@ -30,7 +30,7 @@ pub fn main() !void {
                 }
             }
 
-            if (line[i] >= '0' and line[i] <= '9') {
+            if (std.ascii.isDigit(line[i])) {
                 if (first) {
                     first_num = line[i];
                     first = false;
