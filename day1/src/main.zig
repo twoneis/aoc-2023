@@ -3,7 +3,12 @@ const std = @import("std");
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
 
-    var file = try std.fs.cwd().openFile("input.txt", .{});
+    var args = std.process.args();
+    _ = args.skip();
+
+    const file_name = args.next().?;
+
+    var file = try std.fs.cwd().openFile(file_name, .{});
     defer file.close();
 
     var buf_reader = std.io.bufferedReader(file.reader());
