@@ -60,8 +60,6 @@ fn part_one(file_name: []const u8) !u32 {
 
         if (n_red <= 12 and n_green <= 13 and n_blue <= 14) {
             sum += game_id;
-            std.debug.print("{s}\n", .{line});
-            std.debug.print("Game: {d}\n", .{game_id});
         }
     }
 
