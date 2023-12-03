@@ -38,30 +38,17 @@ pub fn main() !void {
 
     const file_contents = try file_contents_buf.toOwnedSlice();
 
-    std.debug.print("{any}\n", .{file_contents});
-
-    const solution_one = try part_one(file_name);
-    const solution_two = try part_two(file_name);
+    const solution_one = try part_one(file_contents);
+    const solution_two = try part_two(file_contents);
 
     try stdout.print("Solution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
 
     try bw.flush();
 }
 
-fn part_one(file_name: []const u8) !u32 {
-    var file = try std.fs.cwd().openFile(file_name, .{});
-    defer file.close();
-
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
-    const line_len = (try in_stream.readUntilDelimiterOrEof(&buf, '\n')).?.len;
-    var line_num: u32 = 1;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        _ = line;
-        line_num += 1;
-    }
+fn part_one(file: [][]const u8) !u32 {
+    const line_len = file[0].len;
+    const line_num = file.len;
 
     var matrix = try allocator.alloc([]bool, line_num);
     for (matrix, 0..) |_, i| {
@@ -71,55 +58,28 @@ fn part_one(file_name: []const u8) !u32 {
         }
     }
 
-    file = try std.fs.cwd().openFile(file_name, .{});
-    buf_reader = std.io.bufferedReader(file.reader());
-    in_stream = buf_reader.reader();
-
-    var i: usize = 0;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    for (file, 0..) |line, i| {
         for (line, 0..) |c, j| {
             if (!std.ascii.isDigit(c) and c != '.') {
-                if (i + 1 < line_num) {
-                    matrix[i + 1][j] = true;
-                }
-                if (i - 1 >= 0) {
-                    matrix[i - 1][j] = true;
-                }
-                if (j + 1 < line_len) {
-                    matrix[i][j + 1] = true;
-                }
-                if (j - 1 >= 0) {
-                    matrix[i][j - 1] = true;
-                }
-                if (i + 1 < line_num and j + 1 < line_len) {
-                    matrix[i + 1][j + 1] = true;
-                }
-                if (i + 1 < line_num and j - 1 >= 0) {
-                    matrix[i + 1][j - 1] = true;
-                }
-                if (i - 1 >= 0 and j + 1 < line_len) {
-                    matrix[i - 1][j + 1] = true;
-                }
-                if (i - 1 >= 0 and j - 1 >= 0) {
-                    matrix[i - 1][j - 1] = true;
+                for (0..3) |m| {
+                    for (0..3) |n| {
+                        if (0 <= i + m - 1 and i + m - 1 < line_num and 0 <= j + n - 1 and j + n - 1 < line_num) {
+                            const x = i + m - 1;
+                            const y = j + n - 1;
+                            matrix[x][y] = true;
+                        }
+                    }
                 }
             }
         }
-        i += 1;
     }
-
-    file = try std.fs.cwd().openFile(file_name, .{});
-    buf_reader = std.io.bufferedReader(file.reader());
-    in_stream = buf_reader.reader();
 
     var sum: u32 = 0;
 
-    i = 0;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        var j: usize = 0;
+    for (file, 0..) |line, i| {
         var num_buf: [3]u8 = undefined;
         var nbp: usize = 0;
-        for (line) |c| {
+        for (line, 0..) |c, j| {
             if (std.ascii.isDigit(c)) {
                 num_buf[nbp] = c;
                 nbp += 1;
@@ -139,30 +99,17 @@ fn part_one(file_name: []const u8) !u32 {
                     nbp = 0;
                 }
             }
-            j += 1;
         }
-        i += 1;
     }
 
     return sum;
 }
 
-fn part_two(file_name: []const u8) !u32 {
-    const Star = struct { n: u32, ratio: u32 };
+fn part_two(file: [][]const u8) !u32 {
+    const Gear = struct { n: u32, ratio: u32 };
 
-    var file = try std.fs.cwd().openFile(file_name, .{});
-    defer file.close();
-
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
-    const line_len = (try in_stream.readUntilDelimiterOrEof(&buf, '\n')).?.len;
-    var line_num: u32 = 1;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        _ = line;
-        line_num += 1;
-    }
+    const line_len = file[0].len;
+    const line_num = file.len;
 
     var matrix = try allocator.alloc([]u32, line_num);
     for (matrix, 0..) |_, i| {
@@ -172,62 +119,34 @@ fn part_two(file_name: []const u8) !u32 {
         }
     }
 
-    file = try std.fs.cwd().openFile(file_name, .{});
-    buf_reader = std.io.bufferedReader(file.reader());
-    in_stream = buf_reader.reader();
-
-    var i: usize = 0;
     var current_id: u32 = 1;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    for (file, 0..) |line, i| {
         for (line, 0..) |c, j| {
             if (c == '*') {
-                if (i + 1 < line_num) {
-                    matrix[i + 1][j] = current_id;
+                for (0..3) |m| {
+                    for (0..3) |n| {
+                        if (0 <= i + m - 1 and i + m - 1 < line_num and 0 <= j + n - 1 and j + n - 1 < line_num) {
+                            const x = i + m - 1;
+                            const y = j + n - 1;
+                            matrix[x][y] = current_id;
+                        }
+                    }
                 }
-                if (i - 1 >= 0) {
-                    matrix[i - 1][j] = current_id;
-                }
-                if (j + 1 < line_len) {
-                    matrix[i][j + 1] = current_id;
-                }
-                if (j - 1 >= 0) {
-                    matrix[i][j - 1] = current_id;
-                }
-                if (i + 1 < line_num and j + 1 < line_len) {
-                    matrix[i + 1][j + 1] = current_id;
-                }
-                if (i + 1 < line_num and j - 1 >= 0) {
-                    matrix[i + 1][j - 1] = current_id;
-                }
-                if (i - 1 >= 0 and j + 1 < line_len) {
-                    matrix[i - 1][j + 1] = current_id;
-                }
-                if (i - 1 >= 0 and j - 1 >= 0) {
-                    matrix[i - 1][j - 1] = current_id;
-                }
-
                 current_id += 1;
             }
         }
-        i += 1;
     }
 
-    var gears = try allocator.alloc(Star, current_id);
+    var gears = try allocator.alloc(Gear, current_id);
 
     for (gears, 0..) |_, k| {
-        gears[k] = Star{ .n = 0, .ratio = 1 };
+        gears[k] = Gear{ .n = 0, .ratio = 1 };
     }
 
-    file = try std.fs.cwd().openFile(file_name, .{});
-    buf_reader = std.io.bufferedReader(file.reader());
-    in_stream = buf_reader.reader();
-
-    i = 0;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        var j: usize = 0;
+    for (file, 0..) |line, i| {
         var num_buf: [3]u8 = undefined;
         var nbp: usize = 0;
-        for (line) |c| {
+        for (line, 0..) |c, j| {
             if (std.ascii.isDigit(c)) {
                 num_buf[nbp] = c;
                 nbp += 1;
@@ -251,9 +170,7 @@ fn part_two(file_name: []const u8) !u32 {
                     nbp = 0;
                 }
             }
-            j += 1;
         }
-        i += 1;
     }
 
     var ratioSum: u32 = 0;
