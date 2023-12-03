@@ -138,6 +138,7 @@ fn part_two(file: [][]const u8) !u32 {
     }
 
     var gears = try allocator.alloc(Gear, current_id);
+    defer allocator.free(gears);
 
     for (gears, 0..) |_, k| {
         gears[k] = Gear{ .n = 0, .ratio = 1 };
