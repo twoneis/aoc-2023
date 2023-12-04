@@ -101,6 +101,69 @@ fn part_one(file: [][]const u8) !u32 {
 }
 
 fn part_two(file: [][]const u8) !u32 {
-    _ = file;
-    return 0;
+    const Card = struct {
+        n: u32,
+        p: u32,
+    };
+
+    var sum: u32 = 0;
+
+    var points_buf = std.ArrayList(Card).init(allocator);
+    defer points_buf.deinit();
+
+    for (file) |line| {
+        var line_split = std.mem.splitAny(u8, line, ":");
+        const game_id = line_split.next().?;
+        _ = game_id;
+        const game_outcome = line_split.next().?;
+        var outcome_split = std.mem.splitAny(u8, game_outcome, "|");
+        const winning = outcome_split.next().?;
+        const yours = outcome_split.next().?;
+        var winning_str_split = std.mem.splitAny(u8, winning, " ");
+        var yours_str_split = std.mem.splitAny(u8, yours, " ");
+
+        var buf = std.ArrayList(u32).init(allocator);
+        while (winning_str_split.next()) |wns| {
+            if (wns.len == 0) {
+                continue;
+            }
+            const wn = try std.fmt.parseInt(u32, wns, 10);
+            try buf.append(wn);
+        }
+        const winning_numbers = try buf.toOwnedSlice();
+
+        buf.clearRetainingCapacity();
+        while (yours_str_split.next()) |yns| {
+            if (yns.len == 0) {
+                continue;
+            }
+            const yn = try std.fmt.parseInt(u32, yns, 10);
+            try buf.append(yn);
+        }
+        const your_numbers = try buf.toOwnedSlice();
+
+        var single_sum: u32 = 0;
+        for (your_numbers) |n| {
+            for (winning_numbers) |wn| {
+                if (wn == n) {
+                    single_sum += 1;
+                    break;
+                }
+            }
+        }
+        const current_card = Card{ .n = 1, .p = single_sum };
+        try points_buf.append(current_card);
+    }
+
+    var points = try points_buf.toOwnedSlice();
+    sum = @as(u32, @intCast(points.len));
+
+    for (points, 0..) |card, i| {
+        for (0..card.p) |j| {
+            points[i + j + 1].n += 1 * card.n;
+            sum += card.n;
+        }
+    }
+
+    return sum;
 }
