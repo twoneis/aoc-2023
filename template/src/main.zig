@@ -1,11 +1,11 @@
 const std = @import("std");
-var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-const allocator = arena.allocator();
+var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+const allocator = gpa.allocator();
 var bw = std.io.bufferedWriter(std.io.getStdOut().writer());
 const stdout = bw.writer();
 
 pub fn main() !void {
-    defer arena.deinit();
+    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
 
     var args = std.process.args();
     _ = args.skip();
@@ -18,25 +18,27 @@ pub fn main() !void {
     var in_stream = buf_reader.reader();
 
     var file_contents_buf = std.ArrayList([]u8).init(allocator);
+    defer file_contents_buf.deinit();
 
-    var buf = std.ArrayList(u8).init(allocator);
     var eof: bool = false;
     var line_number: usize = 0;
     while (!eof) {
+        var buf = std.ArrayList(u8).init(allocator);
+        defer buf.deinit();
         in_stream.streamUntilDelimiter(buf.writer(), '\n', null) catch |err| switch (err) {
             error.EndOfStream => eof = true,
             else => return err,
         };
         const line = try buf.toOwnedSlice();
+        defer allocator.free(line);
         if (line.len != 0) {
             try file_contents_buf.insert(line_number, line);
+            line_number += 1;
         }
-
-        buf.clearRetainingCapacity();
-        line_number += 1;
     }
 
     const file_contents = try file_contents_buf.toOwnedSlice();
+    defer allocator.free(file_contents);
 
     const solution_one = try part_one(file_contents);
     const solution_two = try part_two(file_contents);
