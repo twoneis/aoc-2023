@@ -5,7 +5,7 @@ var bw = std.io.bufferedWriter(std.io.getStdOut().writer());
 const stdout = bw.writer();
 
 pub fn main() !void {
-    defer if (gpa.deinit() == .leak) std.debug.print("Memory leaked\n", .{});
+    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
 
     var total_timer = try std.time.Timer.start();
 
