@@ -172,9 +172,10 @@ fn part_two(file: [][]const u8) !i64 {
         for (0..targets.items.len) |i| {
             for (current_map) |entry| {
                 const location = targets.items[i];
-                if (location.lower >= entry.from_lower and location.upper < entry.from_upper) {
+                if (location.lower >= entry.from_lower and location.upper <= entry.from_upper) {
                     const new_location = TargetEntry{ .lower = location.lower + entry.to_offset, .upper = location.upper + entry.to_offset };
                     try targets.replaceRange(i, 1, &[_]TargetEntry{new_location});
+                    break;
                 } else if (location.lower >= entry.from_lower and location.lower < entry.from_upper) {
                     const new_location = TargetEntry{ .lower = location.lower + entry.to_offset, .upper = entry.from_upper + entry.to_offset - 1 };
                     const old_location = TargetEntry{ .lower = entry.from_upper, .upper = location.upper };
