@@ -123,7 +123,7 @@ fn part_one(file: [][]const u8) !i64 {
 
 fn part_two(file: [][]const u8) !i64 {
     const Entry = struct { from_lower: i64, from_upper: i64, to_offset: i64 };
-    const TargetEntry = struct { lower: i64, range: i64 };
+    const TargetEntry = struct { lower: i64, upper: i64 };
     var maps = std.ArrayList([]Entry).init(allocator);
     defer maps.deinit();
     var map = std.ArrayList(Entry).init(allocator);
@@ -145,7 +145,7 @@ fn part_two(file: [][]const u8) !i64 {
                     else => return err,
                 });
                 const range = try std.fmt.parseInt(i64, line_split.next().?, 10);
-                try targets.append(TargetEntry{ .lower = start, .range = range });
+                try targets.append(TargetEntry{ .lower = start, .upper = start + range });
             }
             continue;
         }
@@ -160,9 +160,6 @@ fn part_two(file: [][]const u8) !i64 {
     }
     try maps.append(try map.toOwnedSlice());
 
-    var locations = try targets.toOwnedSlice();
-    defer allocator.free(locations);
-
     const filled_maps = try maps.toOwnedSlice();
     defer allocator.free(filled_maps);
     defer {
@@ -172,9 +169,29 @@ fn part_two(file: [][]const u8) !i64 {
     }
 
     for (filled_maps) |current_map| {
-        _ = current_map;
+        for (0..targets.items.len) |i| {
+            for (current_map) |entry| {
+                const location = targets.items[i];
+                if (location.lower >= entry.from_lower and location.upper < entry.from_upper) {
+                    const new_location = TargetEntry{ .lower = location.lower + entry.to_offset, .upper = location.upper + entry.to_offset };
+                    try targets.replaceRange(i, 1, &[_]TargetEntry{new_location});
+                } else if (location.lower >= entry.from_lower and location.lower < entry.from_upper) {
+                    const new_location = TargetEntry{ .lower = location.lower + entry.to_offset, .upper = entry.from_upper + entry.to_offset - 1 };
+                    const old_location = TargetEntry{ .lower = entry.from_upper, .upper = location.upper };
+                    try targets.replaceRange(i, 1, &[_]TargetEntry{old_location});
+                    try targets.append(new_location);
+                } else if (location.upper >= entry.from_lower and location.upper < entry.from_upper) {
+                    const new_location = TargetEntry{ .lower = entry.from_lower + entry.to_offset, .upper = location.upper + entry.to_offset };
+                    const old_location = TargetEntry{ .lower = location.lower, .upper = entry.from_lower - 1 };
+                    try targets.replaceRange(i, 1, &[_]TargetEntry{old_location});
+                    try targets.append(new_location);
+                }
+            }
+        }
     }
 
+    const locations = try targets.toOwnedSlice();
+    defer allocator.free(locations);
     var min = locations[0].lower;
     for (locations) |location| {
         if (location.lower < min) {
