@@ -121,7 +121,66 @@ fn part_one(file: [][]const u8) !i64 {
     return min;
 }
 
-fn part_two(file: [][]const u8) !u32 {
-    _ = file;
-    return 0;
+fn part_two(file: [][]const u8) !i64 {
+    const Entry = struct { from_lower: i64, from_upper: i64, to_offset: i64 };
+    const TargetEntry = struct { lower: i64, range: i64 };
+    var maps = std.ArrayList([]Entry).init(allocator);
+    defer maps.deinit();
+    var map = std.ArrayList(Entry).init(allocator);
+    defer map.deinit();
+    var targets = std.ArrayList(TargetEntry).init(allocator);
+    defer targets.deinit();
+
+    for (file) |line| {
+        if (line[line.len - 1] == ':') {
+            try maps.append(try map.toOwnedSlice());
+            map.clearRetainingCapacity();
+            continue;
+        }
+        if (!std.ascii.isDigit(line[0])) {
+            var line_split = std.mem.splitAny(u8, line, " ");
+            while (line_split.next()) |x| {
+                const start = (std.fmt.parseInt(i64, x, 10) catch |err| switch (err) {
+                    error.InvalidCharacter => continue,
+                    else => return err,
+                });
+                const range = try std.fmt.parseInt(i64, line_split.next().?, 10);
+                try targets.append(TargetEntry{ .lower = start, .range = range });
+            }
+            continue;
+        }
+
+        var line_split = std.mem.splitAny(u8, line, " ");
+        const v = try std.fmt.parseInt(i64, line_split.next().?, 10);
+        const k = try std.fmt.parseInt(i64, line_split.next().?, 10);
+        const range = try std.fmt.parseInt(i64, line_split.next().?, 10);
+        const offset: i64 = v - k;
+
+        try map.append(Entry{ .from_lower = k, .from_upper = k + range, .to_offset = offset });
+    }
+    try maps.append(try map.toOwnedSlice());
+
+    var locations = try targets.toOwnedSlice();
+    defer allocator.free(locations);
+
+    const filled_maps = try maps.toOwnedSlice();
+    defer allocator.free(filled_maps);
+    defer {
+        for (filled_maps, 0..) |_, i| {
+            allocator.free(filled_maps[i]);
+        }
+    }
+
+    for (filled_maps) |current_map| {
+        _ = current_map;
+    }
+
+    var min = locations[0].lower;
+    for (locations) |location| {
+        if (location.lower < min) {
+            min = location.lower;
+        }
+    }
+
+    return min;
 }
