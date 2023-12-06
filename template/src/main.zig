@@ -62,7 +62,7 @@ pub fn main() !void {
     try stdout.print("\nSolution part one: {d}\nTime part 1 (without parsing file): {e:.3}s\n", .{ solution_one, time_part_one });
     try stdout.print("\nSolution part two: {d}\nTime part 2 (without parsing file): {e:.3}s)\n", .{ solution_two, time_part_two });
 
-    try stdout.print("\nTotal time (with file parsing): {e:.3}\n", .{total_time});
+    try stdout.print("\nTotal time (with file parsing): {e:.3}s\n", .{total_time});
 
     try bw.flush();
 }
