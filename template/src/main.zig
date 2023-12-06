@@ -51,7 +51,7 @@ pub fn main() !void {
 
     const solution_one = try part_one(file_contents);
     const solution_two = try part_two(file_contents);
-    try stdout.print("\nSolution part one: {d}\n Solution part two: {d}\n", .{ solution_one, solution_two });
+    try stdout.print("\nSolution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
 
     const nano_total = total_timer.read();
     const total_time: f64 = @as(f64, @floatFromInt(nano_total)) * std.math.pow(f64, 10, -6);

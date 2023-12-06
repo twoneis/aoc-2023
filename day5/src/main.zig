@@ -46,23 +46,33 @@ pub fn main() !void {
         }
     }
 
-    var timer_part_one = try std.time.Timer.start();
-    const solution_one = try part_one(file_contents);
-    const nano_part_one = timer_part_one.read();
-    const time_part_one: f64 = @as(f64, @floatFromInt(nano_part_one)) * std.math.pow(f64, 10, -9);
+    const n_runs: usize = 1000;
 
-    var timer_part_two = try std.time.Timer.start();
+    const solution_one = try part_one(file_contents);
     const solution_two = try part_two(file_contents);
-    const nano_part_two = timer_part_two.read();
-    const time_part_two: f64 = @as(f64, @floatFromInt(nano_part_two)) * std.math.pow(f64, 10, -9);
+    try stdout.print("\nSolution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
+    try bw.flush();
 
     const nano_total = total_timer.read();
-    const total_time: f64 = @as(f64, @floatFromInt(nano_total)) * std.math.pow(f64, 10, -9);
+    const total_time: f64 = @as(f64, @floatFromInt(nano_total)) * std.math.pow(f64, 10, -6);
 
-    try stdout.print("\nSolution part one: {d}\nTime part 1 (without parsing file): {e:.3}s\n", .{ solution_one, time_part_one });
-    try stdout.print("\nSolution part two: {d}\nTime part 2 (without parsing file): {e:.3}s)\n", .{ solution_two, time_part_two });
+    var nano_part_one: u64 = 0;
+    for (0..n_runs) |_| {
+        var timer_part_one = try std.time.Timer.start();
+        _ = try part_one(file_contents);
+        nano_part_one += timer_part_one.read();
+    }
+    const time_part_one: f64 = (@as(f64, @floatFromInt(nano_part_one)) * std.math.pow(f64, 10, -6)) / @as(f64, @floatFromInt(n_runs));
 
-    try stdout.print("\nTotal time (with file parsing): {e:.3}\n", .{total_time});
+    var nano_part_two: u64 = 0;
+    for (0..n_runs) |_| {
+        var timer_part_two = try std.time.Timer.start();
+        _ = try part_two(file_contents);
+        nano_part_two += timer_part_two.read();
+    }
+    const time_part_two: f64 = (@as(f64, @floatFromInt(nano_part_two)) * std.math.pow(f64, 10, -6)) / @as(f64, @floatFromInt(n_runs));
+    try stdout.print("\nTime part 1: {e:.3}ms\nTime part 2: {e:.3}ms\n", .{ time_part_one, time_part_two });
+    try stdout.print("\nTotal time (with file parsing): {e:.3}ms\n", .{total_time});
 
     try bw.flush();
 }
