@@ -52,6 +52,7 @@ pub fn main() !void {
     const solution_one = try part_one(file_contents);
     const solution_two = try part_two(file_contents);
     try stdout.print("\nSolution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
+    try bw.flush();
 
     const nano_total = total_timer.read();
     const total_time: f64 = @as(f64, @floatFromInt(nano_total)) * std.math.pow(f64, 10, -6);
@@ -77,64 +78,126 @@ pub fn main() !void {
     try bw.flush();
 }
 
+const game = struct { order: [5]u32, score: u32, bid: u32 };
+
 fn part_one(file: [][]const u8) !u32 {
-    var hands = allocator.alloc([][]u32, file.len);
-    defer allocator.free(hands);
+    var games: []game = try allocator.alloc(game, file.len);
+    defer allocator.free(games);
 
     for (file, 0..) |line, i| {
+        var occurences = [_]u32{0} ** 15;
         var line_split = std.mem.splitAny(u8, line, " ");
         const hand = line_split.next().?;
-        const bid = std.fmt.parseInt((line_split.next().?));
+        games[i].bid = try std.fmt.parseInt(u32, line_split.next().?, 10);
 
-        var hand_set = [_][]u32{[2]u32{ 0, 0 }} * 5;
-
-        for (hand) |card| {
+        for (hand, 0..) |card, j| {
             const card_value = try card_to_num(card);
-            for (hand_set, 0..) |item, j| {
-                if (item[0] == card_value) {
-                    hand_set[j][1] += 1;
-                }
-                if (item[0] == 0) {
-                    hand_set[j][0] = card_value;
-                    hand_set[j][1] = 1;
-                    break;
-                }
-            }
+            occurences[card_value] += 1;
+            games[i].order[j] = card_value;
         }
 
-        hands[i] = hand_set;
-
-        var counted: [5]u32 = [_]u32{0} * 5;
-        for (hand_set, 0..) |card, j| {
-            _ = j;
-            var was_counted = false;
-            for (counted) |counted_card| {
-                if (counted_card == card[0]) {
-                    was_counted = true;
-                    break;
-                }
-            }
-            if (was_counted) {
-                continue;
+        var max: u32 = 0;
+        var second: u32 = 0;
+        for (occurences) |card| {
+            if (card > max) {
+                second = max;
+                max = card;
+            } else if (card > second) {
+                second = card;
             }
         }
-        _ = bid;
+        games[i].score = switch (max) {
+            5 => 6,
+            4 => 5,
+            3 => if (second == 2) 4 else 3,
+            2 => if (second == 2) 2 else 1,
+            else => 0,
+        };
     }
 
-    for (hands) |hand_one| {
-        _ = hand_one;
+    std.sort.insertion(game, games, {}, compare);
+
+    var sum: u32 = 0;
+
+    for (games, 1..) |cur_game, i| {
+        sum += @as(u32, @intCast(i)) * cur_game.bid;
     }
 
-    return 0;
+    return sum;
 }
 
 fn part_two(file: [][]const u8) !u32 {
-    _ = file;
-    return 0;
+    var games: []game = try allocator.alloc(game, file.len);
+    defer allocator.free(games);
+
+    for (file, 0..) |line, i| {
+        var occurences = [_]u32{0} ** 15;
+        var line_split = std.mem.splitAny(u8, line, " ");
+        const hand = line_split.next().?;
+        games[i].bid = try std.fmt.parseInt(u32, line_split.next().?, 10);
+
+        for (hand, 0..) |card, j| {
+            const card_value = try card_to_num_jocker(card);
+            occurences[card_value] += 1;
+            games[i].order[j] = card_value;
+        }
+
+        var max: u32 = 0;
+        var second: u32 = 0;
+        for (occurences, 0..) |card, j| {
+            if (j == 1) {
+                continue;
+            }
+
+            if (card + occurences[1] > max) {
+                if (max != 0) {
+                    second = max - occurences[1];
+                }
+                max = card + occurences[1];
+            } else if (card > second) {
+                second = card;
+            }
+        }
+
+        if (max == 0) {
+            max = 5;
+        }
+
+        games[i].score = switch (max) {
+            5 => 6,
+            4 => 5,
+            3 => if (second == 2) 4 else 3,
+            2 => if (second == 2) 2 else 1,
+            else => 0,
+        };
+    }
+
+    std.sort.insertion(game, games, {}, compare);
+
+    var sum: u32 = 0;
+
+    for (games, 1..) |cur_game, i| {
+        sum += @as(u32, @intCast(i)) * cur_game.bid;
+    }
+
+    return sum;
+}
+
+fn compare(context: void, lhs: game, rhs: game) bool {
+    _ = context;
+    if (lhs.score != rhs.score) {
+        return lhs.score < rhs.score;
+    }
+    for (lhs.order, rhs.order) |lhv, rhv| {
+        if (lhv != rhv) {
+            return lhv < rhv;
+        }
+    }
+    return false;
 }
 
 fn card_to_num(card: u8) !u32 {
-    switch (card) {
+    return switch (card) {
         '2' => 2,
         '3' => 3,
         '4' => 4,
@@ -149,5 +212,24 @@ fn card_to_num(card: u8) !u32 {
         'K' => 13,
         'A' => 14,
         else => error.InvalidCharacter,
-    }
+    };
+}
+
+fn card_to_num_jocker(card: u8) !u32 {
+    return switch (card) {
+        '2' => 2,
+        '3' => 3,
+        '4' => 4,
+        '5' => 5,
+        '6' => 6,
+        '7' => 7,
+        '8' => 8,
+        '9' => 9,
+        'T' => 10,
+        'J' => 1,
+        'Q' => 12,
+        'K' => 13,
+        'A' => 14,
+        else => error.InvalidCharacter,
+    };
 }
