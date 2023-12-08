@@ -52,7 +52,7 @@ pub fn main() !void {
     _ = n_runs;
 
     // const solution_one = try part_one(file_contents);
-    const solution_one = 0;
+    const solution_one = try part_one(file_contents);
     const solution_two = try part_two(file_contents);
     try stdout.print("\nSolution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
     try bw.flush();
@@ -113,7 +113,7 @@ fn part_one(file: [][]const u8) !u32 {
     return steps;
 }
 
-fn part_two(file: [][]const u8) !u32 {
+fn part_two(file: [][]const u8) !u64 {
     const instructions = file[0];
     var map = std.StringHashMap([2][]const u8).init(allocator);
     defer map.deinit();
@@ -135,30 +135,46 @@ fn part_two(file: [][]const u8) !u32 {
         }
     }
 
-    var steps: u32 = 0;
-
-    var ip: u32 = 0;
     var locations = try locations_buf.toOwnedSlice();
     defer allocator.free(locations);
-    var all_true = false;
-    while (!all_true) {
-        all_true = true;
-        for (locations, 0..) |location, i| {
-            if (location.key_ptr.*[2] != 'Z') {
-                all_true = false;
-            }
+
+    var distances = try allocator.alloc(u64, locations.len);
+    defer allocator.free(distances);
+
+    for (0..locations.len) |i| {
+        var ip: u32 = 0;
+        var steps: u32 = 0;
+        while (locations[i].key_ptr.*[2] != 'Z') {
             locations[i] = switch (instructions[ip]) {
-                'L' => map.getEntry(location.value_ptr[0]).?,
-                'R' => map.getEntry(location.value_ptr[1]).?,
+                'L' => map.getEntry(locations[i].value_ptr[0]).?,
+                'R' => map.getEntry(locations[i].value_ptr[1]).?,
                 else => return error.InvalidCharacter,
             };
+            steps += 1;
+            ip += 1;
+            if (ip >= instructions.len) {
+                ip = 0;
+            }
         }
-        steps += 1;
-        ip += 1;
-        if (ip >= instructions.len) {
-            ip = 0;
-        }
+        distances[i] = steps;
     }
 
-    return steps - 1;
+    var steps: u64 = 1;
+
+    for (distances) |distance| {
+        steps = least_common_multiple(steps, distance);
+    }
+
+    return steps;
+}
+
+fn least_common_multiple(a: u64, b: u64) u64 {
+    return (a / greatest_common_divisor(a, b)) * b;
+}
+
+fn greatest_common_divisor(a: u64, b: u64) u64 {
+    if (b == 0) {
+        return a;
+    }
+    return greatest_common_divisor(b, a % b);
 }
