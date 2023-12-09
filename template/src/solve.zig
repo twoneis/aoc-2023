@@ -1,4 +1,5 @@
 const process = @import("std").process;
+const expect = @import("std").testing.expect;
 
 var gpa = @import("std").heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();

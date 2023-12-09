@@ -1,5 +1,5 @@
-var gpa = @import("std").heap.GeneralPurposeAllocator(.{}){};
-const allocator = gpa.allocator();
+var arena = @import("std").heap.ArenaAllocator.init(@import("std").heap.page_allocator);
+const allocator = arena.allocator();
 
 var stdout_bw = @import("std").io.bufferedWriter(@import("std").io.getStdOut().writer());
 const stdout = stdout_bw.writer();
@@ -14,16 +14,16 @@ const File = @import("parser.zig").File;
 const PartOne = @import("one.zig").PartOne;
 const PartTwo = @import("two.zig").PartTwo;
 
-const usage = @import("usage.zig").usage;
+const usage = @import("usage.zig");
 
 pub fn main() !void {
-    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
+    defer arena.deinit();
 
     var args = process.args();
     _ = args.skip();
 
     const file_name = args.next() orelse {
-        try usage();
+        try usage.usage();
         return;
     };
 
