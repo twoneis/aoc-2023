@@ -6,6 +6,10 @@ pub const PartOne = struct {
     const Self = @This();
     const T = u32;
 
+    fn parseInt(buf: []const u8) !T {
+        try std.fmt.parseInt(T, buf, 10);
+    }
+
     allocator: Allocator,
 
     pub fn init(alloctor: Allocator) Self {
