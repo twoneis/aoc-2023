@@ -19,7 +19,12 @@
           zls
           lldb
         ];
-        shellHook = ''export PS1="[\u@zig-aoc:\W]\$ "'';
+        shellHook = ''
+          export PS1="[\u@zig-aoc:\W]\$ "
+          alias "run"="zig build run --"
+          alias "benchmark"="zig build benchmark --"
+          alias "test"="zig build test"
+        '';
       };
     };
 }
