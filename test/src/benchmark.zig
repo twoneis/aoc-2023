@@ -14,24 +14,13 @@ const File = @import("parser.zig").File;
 const PartOne = @import("one.zig").PartOne;
 const PartTwo = @import("two.zig").PartTwo;
 
-const usage = @import("usage.zig").usage;
-
 pub fn main() !void {
     defer if (gpa.deinit() == .leak) @panic("Memory leaked");
 
     var args = process.args();
     _ = args.skip();
 
-    const file_name = args.next() orelse {
-        try usage();
-        return;
-    };
-
-    const file = try File.init(allocator, file_name);
-    if (file.lines.len == 0) {
-        try usage.empty_file(file_name);
-        return;
-    }
+    const file_name = args.next().?;
 
     const part_one = PartOne.init(allocator);
     const part_two = PartTwo.init(allocator);
@@ -48,16 +37,16 @@ pub fn main() !void {
 
     for (0..n_runs) |_| {
         parse_timer.reset();
-        const tmp = try File.init(allocator, file_name);
+        const file = try File.init(allocator, file_name);
         defer file.deinit();
         total_parse_time += parse_timer.read();
 
         part_one_timer.reset();
-        _ = try part_one.solve(tmp.lines);
+        _ = try part_one.solve(file.lines);
         total_part_one_time += part_one_timer.read();
 
         part_two_timer.reset();
-        _ = try part_two.solve(tmp.lines);
+        _ = try part_two.solve(file.lines);
         total_part_two_time += part_two_timer.read();
     }
 
@@ -70,8 +59,8 @@ pub fn main() !void {
 
     try stdout.print("============Benchmark============\n", .{});
     try stdout.print("Results for {d} runs\n", .{n_runs});
-    try stdout.print("Time to parse file: {e:.03}ms\n", .{parse_time});
-    try stdout.print("Time part one: {e:.03}ms\n", .{part_one_time});
-    try stdout.print("Time part two: {e:.03}ms\n", .{part_two_time});
+    try stdout.print("Time to parse file: {e:.03}\n", .{parse_time});
+    try stdout.print("Time part one: {e:.03}\n", .{part_one_time});
+    try stdout.print("Time part two: {e:.03}\n", .{part_two_time});
     try stdout_bw.flush();
 }

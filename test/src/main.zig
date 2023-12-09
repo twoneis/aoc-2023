@@ -10,25 +10,15 @@ const File = @import("parser.zig").File;
 const PartOne = @import("one.zig").PartOne;
 const PartTwo = @import("two.zig").PartTwo;
 
-const usage = @import("usage.zig");
-
 pub fn main() !void {
     defer if (gpa.deinit() == .leak) @panic("Memory leaked");
 
     var args = process.args();
     _ = args.skip();
 
-    const file_name = args.next() orelse {
-        try usage.usage();
-        return;
-    };
+    const file_name = args.next().?;
     const file = try File.init(allocator, file_name);
     defer file.deinit();
-
-    if (file.lines.len == 0) {
-        try usage.empty_file(file_name);
-        return;
-    }
 
     const part_one = PartOne.init(allocator);
     const part_two = PartTwo.init(allocator);
