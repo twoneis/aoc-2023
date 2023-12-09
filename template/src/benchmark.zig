@@ -49,7 +49,7 @@ pub fn main() !void {
     for (0..n_runs) |_| {
         parse_timer.reset();
         const tmp = try File.init(allocator, file_name);
-        defer file.deinit();
+        defer tmp.deinit();
         total_parse_time += parse_timer.read();
 
         part_one_timer.reset();
