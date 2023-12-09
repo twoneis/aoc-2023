@@ -3,8 +3,8 @@ const process = @import("std").process;
 var gpa = @import("std").heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
-var bw = @import("std").io.bufferedWriter(@import("std").io.getStdOut().writer());
-const stdout = bw.writer();
+var stdout_bw = @import("std").io.bufferedWriter(@import("std").io.getStdOut().writer());
+const stdout = stdout_bw.writer();
 
 const File = @import("parser.zig").File;
 const PartOne = @import("one.zig").PartOne;
@@ -20,6 +20,10 @@ pub fn main() !void {
     const file = try File.init(allocator, file_name);
     defer file.deinit();
 
+    for (file.lines) |line| {
+        try stdout.print("{s}\n", .{line});
+    }
+
     const part_one = PartOne.init(allocator);
     const part_two = PartTwo.init(allocator);
 
@@ -27,5 +31,5 @@ pub fn main() !void {
     const solution_two = try part_two.solve(file.lines);
 
     try stdout.print("\nSolution part one: {d}\nSolution part two: {d}\n", .{ solution_one, solution_two });
-    try bw.flush();
+    try stdout_bw.flush();
 }
