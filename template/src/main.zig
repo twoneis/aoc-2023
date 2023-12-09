@@ -20,10 +20,6 @@ pub fn main() !void {
     const file = try File.init(allocator, file_name);
     defer file.deinit();
 
-    for (file.lines) |line| {
-        try stdout.print("{s}\n", .{line});
-    }
-
     const part_one = PartOne.init(allocator);
     const part_two = PartTwo.init(allocator);
 
