@@ -39,7 +39,6 @@ pub const PartTwo = struct {
                 var buf = try self.allocator.alloc(T, previous.len - 1);
                 all_zero = true;
                 for (0..previous.len - 1) |j| {
-                    // log("{d}: {d} - {d}\n", .{ j, previous[j + 1], previous[j] });
                     buf[j] = previous[j + 1] - previous[j];
                     if (buf[j] != 0) {
                         all_zero = false;
