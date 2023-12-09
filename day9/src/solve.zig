@@ -14,8 +14,7 @@ const PartTwo = @import("two.zig").PartTwo;
 const usage = @import("usage.zig");
 
 pub fn main() !void {
-    // defer if (gpa.deinit() == .leak) @panic("Memory leaked");
-    defer _ = gpa.deinit();
+    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
 
     var args = process.args();
     _ = args.skip();
