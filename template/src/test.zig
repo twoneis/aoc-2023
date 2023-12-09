@@ -8,28 +8,55 @@ const File = @import("parser.zig").File;
 const PartOne = @import("one.zig").PartOne;
 const PartTwo = @import("two.zig").PartTwo;
 
-test "Test example case for part one" {
-    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
+test PartOne {
+    const file_name = "test1.txt";
+    const file = try File.init(allocator, file_name);
+    defer file.deinit();
 
-    const test_file = try File.init(allocator, "test1.txt");
-    defer test_file.deinit();
+    if (file.lines.len == 0) {
+        stderr("Empty file for part 1\n", .{});
+        return;
+    }
+
     const solver = PartOne.init(allocator);
 
-    const solution = try solver.solve(test_file.lines);
+    const solution = try solver.solve(file.lines);
     const expected = 0;
 
-    expect(solution == expected) catch stderr("Expected {d}, got {d}\n", .{ expected, solution });
+    expect(solution == expected) catch {
+        stderr("Part one\n", .{});
+        stderr("\n=====Unexpected Result=====\n", .{});
+        stderr("Expected {d}, got {d}\n\n", .{ expected, solution });
+        return error.TestUnexpectedResult;
+    };
 }
 
-test "Test example case for part two" {
-    defer if (gpa.deinit() == .leak) @panic("Memory leaked");
+test PartTwo {
+    const file_name = "test2.txt";
+    const file = try File.init(allocator, file_name);
+    defer file.deinit();
 
-    const test_file = try File.init(allocator, "test2.txt");
-    defer test_file.deinit();
+    if (file.lines.len == 0) {
+        stderr("Empty file for part 2\n", .{});
+        return;
+    }
+
     const solver = PartTwo.init(allocator);
 
-    const solution = try solver.solve(test_file.lines);
+    const solution = try solver.solve(file.lines);
     const expected = 0;
 
-    expect(solution == expected) catch stderr("Expected {d}, got {d}\n", .{ expected, solution });
+    expect(solution == expected) catch {
+        stderr("Part two\n", .{});
+        stderr("\n=====Unexpected Result=====\n", .{});
+        stderr("Expected {d}, got {d}\n\n", .{ expected, solution });
+        return error.TestUnexpectedResult;
+    };
+}
+
+test gpa {
+    expect(gpa.deinit() != .leak) catch {
+        stderr("Memory leaked\n", .{});
+        return error.MemoryLeak;
+    };
 }
