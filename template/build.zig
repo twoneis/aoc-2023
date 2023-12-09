@@ -16,7 +16,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "template",
+        .name = "debug",
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
         .root_source_file = .{ .path = "src/main.zig" },
@@ -49,8 +49,26 @@ pub fn build(b: *std.Build) void {
     // This creates a build step. It will be visible in the `zig build --help` menu,
     // and can be selected like this: `zig build run`
     // This will evaluate the `run` step rather than the default, which is "install".
-    const run_step = b.step("run", "Run the app");
+    const run_step = b.step("run", "Get the solution for both parts");
     run_step.dependOn(&run_cmd.step);
+
+    const release_exe = b.addExecutable(.{
+        .name = "release",
+        .root_source_file = .{ .path = "src/benchmark.zig" },
+        .target = target,
+        .optimize = .ReleaseFast,
+    });
+
+    const benchmark_cmd = b.addRunArtifact(release_exe);
+
+    benchmark_cmd.step.dependOn(b.getInstallStep());
+
+    if (b.args) |args| {
+        benchmark_cmd.addArgs(args);
+    }
+
+    const benchmark_step = b.step("benchmark", "Benchmark the performance of the individual parts");
+    benchmark_step.dependOn(&benchmark_cmd.step);
 
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
