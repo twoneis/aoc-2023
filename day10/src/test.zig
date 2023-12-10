@@ -32,7 +32,7 @@ test PartOne {
 }
 
 test PartTwo {
-    const file_name = "test2.txt";
+    const file_name = "test4.txt";
     const file = try File.init(allocator, file_name);
     defer file.deinit();
 

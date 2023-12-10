@@ -56,8 +56,6 @@ pub const PartTwo = struct {
 
         const overshot: T = (@divExact(@as(T, @intCast(path.len)), 2)) - 1;
 
-        log("area: {d} overshot by: {d} = {d}\n", .{ area, overshot, area - overshot });
-
         return area - overshot;
     }
 
