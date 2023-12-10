@@ -15,12 +15,12 @@
       devShell.x86_64-linux = pkgs.mkShell {
         name = "zig-devel";
         packages = with pkgs; [
+          bashInteractive
           zig
           zls
           lldb
         ];
         shellHook = ''
-          export PS1="[\u@zig-aoc:\W]\$ "
           alias "run"="zig build run --"
           alias "benchmark"="zig build benchmark --"
           alias "test"="zig build test --summary all"
