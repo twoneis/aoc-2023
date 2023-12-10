@@ -10,6 +10,10 @@ pub const PartTwo = struct {
         try std.fmt.parseInt(T, buf, 10);
     }
 
+    fn castInt(x: anytype) T {
+        return @as(T, @intCast(x));
+    }
+
     allocator: Allocator,
 
     pub fn init(alloctor: Allocator) Self {
@@ -25,7 +29,7 @@ pub const PartTwo = struct {
         for (lines, 0..) |line, i| {
             for (line, 0..) |char, j| {
                 if (char == 'S') {
-                    starting_position = Cord{ .x = @as(i64, @intCast(j)), .y = @as(i64, @intCast(i)) };
+                    starting_position = Cord{ .x = castInt(j), .y = castInt(i) };
                 }
                 maze.nodes[i][j] = switch (char) {
                     '|' => Node{ .north = true, .south = true, .east = false, .west = false },
@@ -47,14 +51,14 @@ pub const PartTwo = struct {
         for (0..path.len) |i| {
             const j = if (i == path.len - 1) 0 else i + 1;
             const mat = [_][2]T{
-                [_]T{ @as(T, @intCast(path[i].x)), @as(T, @intCast(path[i].y)) },
-                [_]T{ @as(T, @intCast(path[j].x)), @as(T, @intCast(path[j].y)) },
+                [_]T{ castInt(path[i].x), castInt(path[i].y) },
+                [_]T{ castInt(path[j].x), castInt(path[j].y) },
             };
             area += det(mat);
         }
         area = try std.math.absInt(try std.math.divExact(T, area, 2));
 
-        const overshot: T = (@divExact(@as(T, @intCast(path.len)), 2)) - 1;
+        const overshot: T = try std.math.divExact(T, castInt(path.len), 2) - 1;
 
         return area - overshot;
     }

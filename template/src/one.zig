@@ -7,7 +7,11 @@ pub const PartOne = struct {
     const T = u32;
 
     fn parseInt(buf: []const u8) !T {
-        try std.fmt.parseInt(T, buf, 10);
+        return try std.fmt.parseInt(T, buf, 10);
+    }
+
+    fn castInt(x: anytype) T {
+        return @as(T, @intCast(x));
     }
 
     allocator: Allocator,
