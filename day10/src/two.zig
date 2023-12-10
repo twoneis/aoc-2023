@@ -52,13 +52,13 @@ pub const PartTwo = struct {
             area += det(mat);
         }
 
-        area = try std.math.divFloor(T, area, 2);
+        area = try std.math.absInt(try std.math.divFloor(T, area, 2));
 
-        return area;
+        return area - try std.math.divFloor(T, @as(T, @intCast(path.len)), 2);
     }
 
     fn det(mat: anytype) T {
-        return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][1];
+        return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
     }
 };
 
