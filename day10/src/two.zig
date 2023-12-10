@@ -4,7 +4,7 @@ const log = std.debug.print;
 
 pub const PartTwo = struct {
     const Self = @This();
-    const T = u32;
+    const T = i64;
 
     fn parseInt(buf: []const u8) !T {
         try std.fmt.parseInt(T, buf, 10);
@@ -43,9 +43,31 @@ pub const PartTwo = struct {
         const path = try maze.find_loop(starting_position);
         defer self.allocator.free(path);
 
-        return @as(T, @intCast(try std.math.divFloor(usize, path.len, 2)));
+        var area: T = 0;
+        for (0..path.len - 1) |i| {
+            const mat = [_][2]T{
+                [_]T{ @as(T, @intCast(path[i].x)), @as(T, @intCast(path[i].y)) },
+                [_]T{ @as(T, @intCast(path[i + 1].x)), @as(T, @intCast(path[i + 1].y)) },
+            };
+            area += det(mat);
+        }
+
+        area = try std.math.divFloor(T, area, 2);
+
+        return area;
+    }
+
+    fn det(mat: anytype) T {
+        return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][1];
     }
 };
+
+const Edge = struct {
+    from: Cord,
+    to: Cord,
+    len: usize,
+};
+
 const Cord = struct {
     x: i64,
     y: i64,
@@ -148,4 +170,12 @@ const PipeMap = struct {
     }
 };
 
-const Node = struct { north: bool, east: bool, south: bool, west: bool };
+const Node = struct {
+    north: bool,
+    east: bool,
+    south: bool,
+    west: bool,
+    pub fn eql(a: Node, b: Node) bool {
+        return a.north == b.north and a.east == b.east and a.south == b.south and a.west == b.west;
+    }
+};

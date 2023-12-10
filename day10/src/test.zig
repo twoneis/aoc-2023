@@ -21,7 +21,7 @@ test PartOne {
     const solver = PartOne.init(allocator);
 
     const solution = try solver.solve(file.lines);
-    const expected = 0;
+    const expected = 8;
 
     expect(solution == expected) catch {
         stderr("Part one\n", .{});
@@ -44,7 +44,7 @@ test PartTwo {
     const solver = PartTwo.init(allocator);
 
     const solution = try solver.solve(file.lines);
-    const expected = 0;
+    const expected = 10;
 
     expect(solution == expected) catch {
         stderr("Part two\n", .{});
