@@ -44,17 +44,21 @@ pub const PartTwo = struct {
         defer self.allocator.free(path);
 
         var area: T = 0;
-        for (0..path.len - 1) |i| {
+        for (0..path.len) |i| {
+            const j = if (i == path.len - 1) 0 else i + 1;
             const mat = [_][2]T{
                 [_]T{ @as(T, @intCast(path[i].x)), @as(T, @intCast(path[i].y)) },
-                [_]T{ @as(T, @intCast(path[i + 1].x)), @as(T, @intCast(path[i + 1].y)) },
+                [_]T{ @as(T, @intCast(path[j].x)), @as(T, @intCast(path[j].y)) },
             };
             area += det(mat);
         }
+        area = try std.math.absInt(try std.math.divExact(T, area, 2));
 
-        area = try std.math.absInt(try std.math.divFloor(T, area, 2));
+        const overshot: T = (@divExact(@as(T, @intCast(path.len)), 2)) - 1;
 
-        return area - try std.math.divFloor(T, @as(T, @intCast(path.len)), 2);
+        log("area: {d} overshot by: {d} = {d}\n", .{ area, overshot, area - overshot });
+
+        return area - overshot;
     }
 
     fn det(mat: anytype) T {
