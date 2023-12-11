@@ -27,10 +27,9 @@ pub const PartTwo = struct {
         };
 
         var empty_rows = std.AutoHashMap(usize, void).init(self.allocator);
-        defer empty_rows.clearAndFree();
         defer empty_rows.deinit();
         var empty_columns = std.AutoHashMap(usize, void).init(self.allocator);
-        defer empty_columns.clearAndFree();
+        defer empty_columns.deinit();
 
         var galaxies_buf = std.ArrayList(Cord).init(self.allocator);
 
