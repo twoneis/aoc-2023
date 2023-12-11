@@ -79,8 +79,6 @@ pub const PartOne = struct {
         }
 
         var galaxies_buf = std.ArrayList(Cord).init(self.allocator);
-
-        // TODO: Replace lines wit expanded;
         for (0..expanded.len) |i| {
             for (0..expanded[i].len) |j| {
                 if (expanded[i][j] == '#') {
